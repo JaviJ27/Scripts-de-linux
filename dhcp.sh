@@ -20,6 +20,17 @@ root() {
   fi
 }
 
+conexion() {
+  ping -c1 8.8.8.8 > /dev/null 2> /dev/null
+  if [[ $? -eq 0 ]];then
+    echo "Parece que su conexion es buena a si que vamos a instalar el DHCP"
+    return 0
+  else
+    echo "Parace que no tiene conxion, compruebe su conexion o intentelo mas tarde"
+    exit 1
+  fi
+}
+
 dhcp_install() {
   echo ""
   echo "Comprobando si tiene el servidor DHCP instalado..."
@@ -30,17 +41,6 @@ dhcp_install() {
   else
     echo "El servidor DHCP esta instalado"
     return 0
-  fi
-}
-
-conexion() {
-  ping -c1 8.8.8.8 > /dev/null 2> /dev/null
-  if [[ $? -eq 0 ]];then
-    echo "Parece que su conexion es buena a si que vamos a instalar el DHCP"
-    return 0
-  else
-    echo "Parace que no tiene conxion, compruebe su conexion o intentelo mas tarde"
-    exit 1
   fi
 }
 
@@ -63,9 +63,66 @@ instalar_DHCP() {
     fi
   fi
 }
+figlet_install() {
+  echo ""
+  echo "Comprobando si tiene el binario figlet instalado..."
+  sleep 2
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "figlet esta instalado"
+    return 0
+  fi
+}
+
+figlet_install() {
+  echo ""
+  echo "Comprobando si tiene el binario figlet instalado..."
+  sleep 2
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "figlet esta instalado"
+    return 0
+  fi
+}
+
+instalar_figlet() {
+  if [[ $? -eq 1 ]];then
+    echo ""
+    echo "Comprobando su conexion a internet..."
+    sleep 2
+    conexion
+    if [[ $? -eq 0 ]];then
+      echo ""
+      echo "Instalando figlet..."
+      apt install -y figlet > /dev/null 2> /dev/null
+      if [[ $? -eq 0 ]];then
+        echo "figlet se a instalado con exito"
+      else
+        echo "Ha ocurrido un error al intentar descargar figlet"
+        exit 1
+      fi
+    fi
+  fi
+}
+figlet_install() {
+  echo ""
+  echo "Comprobando si tiene el binario figlet instalado..."
+  sleep 2
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "figlet esta instalado"
+    return 0
+  fi
+}
 
 add_interfaces(){
-  echo -e "\e[35m$(toilet -f wideterm.tlf "Modificar interfaces")\e[0m"
+  echo -e "\e[35m$(figlet -f wideterm.tlf "Modificar interfaces")\e[0m"
   echo ""
   echo "Interfaces disponibles"
   echo "----------------------"
@@ -77,7 +134,7 @@ add_interfaces(){
 }
 
 limpiar_pool(){
-  echo -e "\e[35m$(toilet -f wideterm.tlf "Limpiar pools")\e[0m"
+  echo -e "\e[35m$(figlet -f wideterm.tlf "Limpiar pools")\e[0m"
   echo ""
   comprobador=0
   while [[ $comprobador -eq 0 ]];do
@@ -98,7 +155,7 @@ limpiar_pool(){
 }
 
 add_pool() {
-  echo -e "\e[35m$(toilet -f wideterm.tlf "Añadir nuevo pool")\e[0m"
+  echo -e "\e[35m$(figlet -f wideterm.tlf "Añadir nuevo pool")\e[0m"
   echo ""
   echo -n "Introduzca un nombre para el pool: "
   read nombre_pool
@@ -151,7 +208,7 @@ add_pool() {
 }
 
 add_reserva(){
-  echo -e "\e[35m$(toilet -f wideterm.tlf "Añadir nueva reserva")\e[0m"
+  echo -e "\e[35m$(figlet -f wideterm.tlf "Añadir nueva reserva")\e[0m"
   echo ""
   echo -n "Introduzca el nombre del equipo para la reserva sin espacios: "
   read nombre_reserva
@@ -206,6 +263,7 @@ menu_dhcp() {
     elif [[ "$menu" =~ ^(5)$ ]]; then
       limpiar
       terminar
+      comprobador_menu=1
     else
       echo "Error, intruduzca un numero del 1 al 5"
       echo ""
@@ -218,5 +276,7 @@ limpiar
 root
 dhcp_install
 instalar_DHCP
+figlet_install
+instalar_figlet
 pausa
 menu_dhcp
