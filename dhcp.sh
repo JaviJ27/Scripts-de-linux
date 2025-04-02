@@ -1,13 +1,14 @@
 #!/bin/bash
 limpiar(){
-clear
-figlet -f big -w 200 "INSTALADOR   DHCP" | /usr/games/lolcat
-}
+  clear
+  figlet -f big -w 200 "INSTALADOR   DHCP" | /usr/games/lolcat
+  }
+
 pausa(){
-echo ""
-echo -n "Pulse enter para continuar"
-read space
-}
+  echo ""
+  echo -n "Pulse enter para continuar"
+  read space
+  }
 root() {
   echo "Comprobando que usted tenga permisos de administrador..."
   sleep 2
@@ -63,33 +64,25 @@ instalar_DHCP() {
     fi
   fi
 }
-figlet_install() {
+
+binarios_install() {
   echo ""
-  echo "Comprobando si tiene el binario figlet instalado..."
-  sleep 2
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
-    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
+  echo "Comprobando si tiene todos los paquetes necesarios..."
+  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
+  mv wideterm.tlf /usr/share/figlet/
+  mv pagga.tlf /usr/share/figlet/
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" && apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
     return 1
   else
-    echo "figlet esta instalado"
+    echo "Todos binarios estan instalados"
     return 0
   fi
 }
 
-figlet_install() {
-  echo ""
-  echo "Comprobando si tiene el binario figlet instalado..."
-  sleep 2
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
-    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
-    return 1
-  else
-    echo "figlet esta instalado"
-    return 0
-  fi
-}
-
-instalar_figlet() {
+instalar_binarios() {
   if [[ $? -eq 1 ]];then
     echo ""
     echo "Comprobando su conexion a internet..."
@@ -97,27 +90,15 @@ instalar_figlet() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
-      echo "Instalando figlet..."
-      apt install -y figlet > /dev/null 2> /dev/null
+      echo "Instalando binarios de formato de texto..."
+      apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
-        echo "figlet se a instalado con exito"
+        echo "Todos los binarios se han instalado con exito"
       else
-        echo "Ha ocurrido un error al intentar descargar figlet"
+        echo "Ha ocurrido un error al intentar descargar los binarios necesarios"
         exit 1
       fi
     fi
-  fi
-}
-figlet_install() {
-  echo ""
-  echo "Comprobando si tiene el binario figlet instalado..."
-  sleep 2
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)"; then
-    echo "figlet no esta instalado, a si que vamos a intentar instalarlo"
-    return 1
-  else
-    echo "figlet esta instalado"
-    return 0
   fi
 }
 
@@ -232,7 +213,6 @@ terminar() {
   else
     echo "Algun error impide el funcionamiento del DHCP. Revisa la configuración"
     echo ""
-    pausa
   fi
 }
 menu_dhcp() {
@@ -240,12 +220,13 @@ menu_dhcp() {
   while [[ $comprobador_menu -eq 0 ]];do
     limpiar
     echo -e  "\e[36m$(figlet -f pagga.tlf -w 200 "Menu de configuracion del DHCP")\e[0m"
-    echo -e  "\e[32m------------------------------\e[0m"
+    echo ""
     echo "1. Modificar las interfaces en las que va a actuar el DHCP"
     echo "2. Limpiar el fichero de pools del DHCP"
     echo "3. Añadir pool al DHCP"
     echo "4. Añadir reserva al DHCP"
     echo "5. Aplicar los cambios y salir"
+    echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
     if [[ "$menu" =~ ^(1)$ ]]; then
@@ -262,8 +243,8 @@ menu_dhcp() {
       add_reserva
     elif [[ "$menu" =~ ^(5)$ ]]; then
       limpiar
-      terminar
       comprobador_menu=1
+      terminar
     else
       echo "Error, intruduzca un numero del 1 al 5"
       echo ""
@@ -276,7 +257,7 @@ limpiar
 root
 dhcp_install
 instalar_DHCP
-figlet_install
-instalar_figlet
+binarios_install
+instalar_binarios
 pausa
 menu_dhcp
