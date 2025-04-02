@@ -1,0 +1,186 @@
+#!/bin/bash
+limpiar(){
+  clear
+  figlet -f big -w 200 "Creador de 128 particiones" | /usr/games/lolcat
+  }
+
+pausa(){
+  echo ""
+  echo -n "Pulse enter para continuar"
+  read space
+  }
+
+root() {
+  echo "Comprobando que usted tenga permisos de administrador..."
+  sleep 2
+  if [[ $UID -eq 0 ]];then
+    echo "Usted es ROOT"
+    return 0
+  else
+    echo "Usted no es ROOT, así que no puede ejecutar ese scipt"
+    exit 1
+  fi
+}
+
+conexion() {
+  ping -c1 8.8.8.8 > /dev/null 2> /dev/null
+  if [[ $? -eq 0 ]];then
+    echo "Parece que su conexion es buena a si que vamos a instalar fdisk"
+    return 0
+  else
+    echo "Parace que no tiene conxion, compruebe su conexion o intentelo mas tarde"
+    exit 1
+  fi
+}
+
+fdisk_install() {
+  echo ""
+  echo "Comprobando si tiene fdisk instalado..."
+  sleep 2
+  if apt policy fdisk 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "fdisk no esta instalado, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "fdisk esta instalado"
+    return 0
+  fi
+}
+
+instalar_fdisk() {
+  if [[ $? -eq 1 ]];then
+    echo ""
+    echo "Comprobando su conexion a internet..."
+    sleep 2
+    conexion
+    if [[ $? -eq 0 ]];then
+      echo ""
+      echo "Instalando servidor DHCP..."
+      apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      if [[ $? -eq 0 ]];then
+        echo "fdisk se a instalado con exito"
+      else
+        echo "Ha ocurrido un error al intentar descargar fdisk"
+        exit 1
+      fi
+    fi
+  fi
+}
+
+binarios_install() {
+  echo ""
+  echo "Comprobando si tiene todos los paquetes necesarios..."
+  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
+  mv wideterm.tlf /usr/share/figlet/
+  mv pagga.tlf /usr/share/figlet/
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" && apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "Todos binarios estan instalados"
+    return 0
+  fi
+}
+
+instalar_binarios() {
+  if [[ $? -eq 1 ]];then
+    echo ""
+    echo "Comprobando su conexion a internet..."
+    sleep 2
+    conexion
+    if [[ $? -eq 0 ]];then
+      echo ""
+      echo "Instalando binarios de formato de texto..."
+      apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
+      if [[ $? -eq 0 ]];then
+        echo "Todos los binarios se han instalado con exito"
+      else
+        echo "Ha ocurrido un error al intentar descargar los binarios necesarios"
+        exit 1
+      fi
+    fi
+  fi
+}
+
+select_disco() {
+  comprobador_disco=0
+  while [[ $comprobador_disco -eq 0 ]];do
+    limpiar
+    echo ""
+    echo -e "\e[35m$(figlet -f wideterm.tlf "Selecciar el disco que se va a particionar")\e[0m"
+    echo ""
+    echo "Los discos disponibles son los siguientes:"
+    echo "------------------------------------------"
+    lsblk | egrep "(^vd|^sd|^nvme)" | awk '{print $1}'
+    echo ""
+    echo -n "Seleccione el disco donde se van a realizar las particiones: "
+    read disco
+    echo -e "q" | fdisk /dev/$disco > /dev/null 2> /dev/null
+    if [[ $? -eq 0 ]];then
+      comprobador=0
+      while [[ $comprobador -eq 0 ]];do
+        echo ""
+        echo -n "El progama creara 128 particiones en $disco, esto borrara toda la informacion de dicho disco. ¿Quiere continuar? (s/n): "
+        read sure
+        if [[ "$sure" =~ ^(s|S)$ ]]; then
+          comprobador=1
+          comprobador_disco=1
+        elif [[ "$sure" =~ ^(n|N)$ ]]; then
+          echo ""
+          echo -n "¿Quiere seleccionar otro disco? (s/n): "
+	  read sure
+          if [[ "$sure" =~ ^(s|S)$ ]]; then
+            comprobador=1
+          elif [[ "$sure" =~ ^(n|N)$ ]]; then
+            comprobador=1
+	    comprobador_disco=1
+	    exit 1
+          else
+            echo "Error, intruduzca s (si) o n (no)"
+            echo ""
+          fi
+        else
+          echo "Error, intruduzca s (si) o n (no)"
+          echo ""
+        fi
+      done
+    else
+      echo ""
+      echo "Error, el disco introducido no es correcto"
+      pausa
+    fi
+  done
+}
+
+particionado(){
+  limpiar
+  echo -e "\e[35m$(figlet -f wideterm.tlf "Particionado del disco")\e[0m"
+  echo "Limpiando disco..."
+  sleep 2
+  wipefs -a /dev/$disco > /dev/null
+  echo -e "g\nw" | fdisk /dev/sdb > /dev/null
+  echo "Creando particiones..."
+  for i in {1..128};do
+    echo -e "n\n$i\n\n+1K\nw" | fdisk /dev/sdb > /dev/null 2> /dev/null
+  done
+  if [[ $? -eq 0 ]];then
+    echo ""
+    echo "Las particiones han sido creadas con exito"
+  else
+    echo ""
+    echo "Ha ocurrido un error al crear las particiones"
+  fi
+}
+
+#-------------------------------------------------------------------
+
+limpiar
+root
+fdisk_install
+instalar_fdisk
+binarios_install
+instalar_binarios
+pausa
+select_disco
+particionado
