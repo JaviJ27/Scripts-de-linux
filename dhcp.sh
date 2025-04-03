@@ -30,7 +30,7 @@ root() {
 }
 
 conexion() {
-  ping -c1 8.8.8.8 > /dev/null 2> /dev/null
+  ping -c3 8.8.8.8 > /dev/null 2> /dev/null
   if [[ $? -eq 0 ]];then
     echo "Tiene una buena conexion"
     return 0
