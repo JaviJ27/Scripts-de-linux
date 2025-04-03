@@ -31,7 +31,7 @@ root() {
 conexion() {
   ping -c1 8.8.8.8 > /dev/null 2> /dev/null
   if [[ $? -eq 0 ]];then
-    echo "Parece que su conexion es buena a si que vamos a instalar el DHCP"
+    echo "Tiene una buena conexion"
     return 0
   else
     echo "Parace que no tiene conxion, compruebe su conexion o intentelo mas tarde"
