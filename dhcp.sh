@@ -30,28 +30,48 @@ root() {
 }
 
 conexion() {
-  ping -c3 8.8.8.8 > /dev/null 2> /dev/null
-  if [[ $? -eq 0 ]];then
-    echo "Tiene una buena conexion"
-    return 0
-  else
-    comprobador=0
-    while [[ $comprobador -eq 0 ]];do
-    echo "Parace que no tiene conxion, ¿Quiere modificar el fichero de interfaces? (s/n): "
-    read sure
-    if [[ "$sure" =~ ^(s|S)$ ]]; then
-      comprobador=1
-      menu_interfaces_sin_conexion
-      pasusa
-    elif [[ "$sure" =~ ^(n|N)$ ]]; then
-      comprobador=1
-      exit 1
+  comprobador_internet=0
+  while [[ $comprobador_internet -eq 0 ]];do
+    echo "Comprobando su conexion a internet..."
+    ping -c3 8.8.8.8 > /dev/null 2> /dev/null
+    if [[ $? -eq 0 ]];then
+      echo "Tiene una buena conexion"
+      comprobador_internet=1
+      return 0
     else
-      echo "Error, intruduzca s (si) o n (no)"
-      echo ""
+      comprobador=0
+      while [[ $comprobador -eq 0 ]];do
+        echo -n "Parace que no tiene conxion, ¿Quiere modificar el fichero de interfaces? (s/n): "
+        read sure
+        if [[ "$sure" =~ ^[sS]$ ]];then
+          comprobador=1
+	  menu_interfaces
+	  limpair
+        elif [[ "$sure" =~ ^[nN]$ ]]; then
+          comprobador=1
+        else
+          echo "Error, intruduzca s (si) o n (no)"
+          echo ""
+	  comprobador=0
+        fi
+      done
+      comprobador=0
+      while [[ $comprobador -eq 0 ]];do
+        echo -n "¿Quiere reintentar la conexion? (s/n): "
+        read sure
+        if [[ "$sure" =~ ^[sS]$ ]]; then
+          limpiar
+          comprobador=1
+        elif [[ "$sure" =~ ^[nN]$ ]]; then
+          comprobador=1
+          exit 1
+        else
+          echo "Error, intruduzca s (si) o n (no): "
+          echo ""
+        fi
+      done
     fi
   done
-  fi
 }
 
 dhcp_install() {
@@ -70,8 +90,6 @@ dhcp_install() {
 instalar_DHCP() {
   if [[ $? -eq 1 ]];then
     echo ""
-    echo "Comprobando su conexion a internet..."
-    sleep 2
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
@@ -97,18 +115,11 @@ binarios_install() {
     echo "Todos los paquetes estan instalados"
     return 0
   fi
-  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-de-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-de-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
-  mv wideterm.tlf /usr/share/figlet/
-  mv pagga.tlf /usr/share/figlet/
 }
 
 instalar_binarios() {
   if [[ $? -eq 1 ]];then
     echo ""
-    echo "Comprobando su conexion a internet..."
-    sleep 2
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
@@ -122,11 +133,13 @@ instalar_binarios() {
       fi
     fi
   fi
+  wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
+  mv wideterm.tlf /usr/share/figlet/
+  mv pagga.tlf /usr/share/figlet/
 }
 
 limpiar_interfaces(){
-  limpiar
-  echo ""
   echo "limpiando el fichero /etc/network/interfaces..."
   sleep 2
   echo "source /etc/network/interfaces.d/*" > /etc/network/interfaces
@@ -134,11 +147,106 @@ limpiar_interfaces(){
   echo "#The loopback network interface" >> /etc/network/interfaces
   echo "auto lo" >> /etc/network/interfaces
   echo "iface lo inet loopback" >> /etc/network/interfaces
-  echo "El fichero /etc/network/interfaces se ha "
+  echo "El fichero /etc/network/interfaces se ha limpiado correctamente"
+  pausa
 }
 
-menu_interfaces_sin_conexion(){
-  limpiar
+nueva_interfaz(){
+  comprobador=0
+  while [[ $comprobador -eq 0 ]];do
+    limpiar
+    echo "Interfaces disponibles"
+    echo "----------------------"
+    ip a | grep -o "[0-9]: [a-zA-Z0-9]*"
+    echo ""
+    echo -n "Introduce la interfaz de red que quiere añadir: "
+    read interfaz
+    echo ""
+    echo -n "¿Obtendra IP de forma estatica o dinamica?: "
+    read modo
+    echo ""
+    if [[ "$modo" =~ ^(dinamica|estatica)$ ]]; then
+      echo "" >> /etc/network/interfaces
+      if [[ $modo = "dinamica" ]];then
+        echo "allow-hotplug $interfaz" >> /etc/network/interfaces
+        echo "iface $interfaz inet dhcp" >> /etc/network/interfaces
+	echo "Interfaz añadida con exito"
+	comprobador=1
+	pausa
+      elif [[ $modo = "estatica" ]];then
+	echo "allow-hotplug $interfaz" >> /etc/network/interfaces
+        echo "iface $interfaz inet static" >> /etc/network/interfaces
+	echo -n "Introduzca la IP que tendra la interfaz: "
+	read ip
+	echo ""
+	echo -n "Introduzca la mascara de red que tendra su interfaz: "
+	read mascara
+	echo ""
+	echo "  address $ip" >> /etc/network/interfaces
+	echo "  netmask $mascara" >> /etc/network/interfaces
+	comprobador_gateway=0
+	while [[ $comprobador_gateway -eq 0 ]];do
+	  echo -n "¿Quiere introducir puerta de enlace? (s/n): "
+	  read sure
+	  echo ""
+	  if [[ "$sure" =~ ^[sS]$ ]]; then
+            comprobador_gateway=1
+            echo -n "Introduzca la puerta de enlace: "
+	    read gateway
+	    echo ""
+            echo "  gateway $gateway" >> /etc/network/interfaces
+          elif [[ "$sure" =~ ^[nN]$ ]]; then
+            comprobador_gateway=1
+          else
+            echo "Error, intruduzca s (si) o n (no)"
+            echo ""
+          fi
+	done
+	comprobador_dns=0
+	while [[ $comprobador_dns -eq 0 ]];do
+	  echo -n "¿Quiere introducir un servidor DNS? (s/n): "
+	  read sure
+	  if [[ "$sure" =~ ^[sS]$ ]]; then
+            comprobador_dns=1
+            echo -n "Introduzca la IP del servidor DNS: "
+	    read dns
+            echo "  dns-nameserver $dns" >> /etc/network/interfaces
+            echo ""
+  	    echo "Interfaz añadida con exito"
+	    comprobador=1
+	    pausa
+          elif [[ "$sure" =~ ^[nN]$ ]]; then
+            comprobador_dns=1
+            echo ""
+  	    echo "Interfaz añadida con exito"
+	    comprobador=1
+	    pausa
+          else
+            echo "Error, intruduzca s (si) o n (no)"
+            echo ""
+          fi
+	done
+      fi
+    else
+      echo "Error, modo no valido, introduzca '"'estatica'"' o '"'dhcp'"'"
+      pausa
+    fi
+  done
+}
+
+aplicar_interfaces() {
+  echo "Aplicando los cambios..."
+  systemctl restart networking.service 2> /dev/null
+  if [[ $? -eq 0 ]]; then
+    echo "Las interfaces han sido configuradas con exito y estan funcionado"
+    pausa
+  else
+    echo "Algun error impide el funcionamiento de las interfaces. Revisa la configuración"
+    pausa
+  fi
+}
+
+menu_interfaces(){
   comprobador_menu=0
   while [[ $comprobador_menu -eq 0 ]];do
     limpiar
@@ -153,31 +261,23 @@ menu_interfaces_sin_conexion(){
     echo ""
     echo "1. Limpiar fichero de interfaces"
     echo "2. Añadir nueva configuracion de interfaz"
-    echo "3. Eliminar la configuración de una interfaz"
-    echo "4. Aplicar los cambios y continuar con la instalación"
+    echo "3. Aplicar cambios"
+    echo "4. Salir"
     echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
-    if [[ "$menu" =~ ^(1)$ ]]; then
+    if [[ "$menu" =~ ^1$ ]]; then
       limpiar
-      add_interfaces
-    elif [[ "$menu" =~ ^(2)$ ]]; then
-      limpiar
-      limpiar_pool
-    elif [[ "$menu" =~ ^(3)$ ]]; then
-      limpiar
-      add_pool
-    elif [[ "$menu" =~ ^(4)$ ]]; then
-      limpiar
-      add_reserva
-    elif [[ "$menu" =~ ^(5)$ ]]; then
-      limpiar
+      limpiar_interfaces
+    elif [[ "$menu" =~ ^2$ ]]; then
+      nueva_interfaz
+    elif [[ "$menu" =~ ^3$ ]]; then
+      aplicar_interfaces
+    elif [[ "$menu" =~ ^4$ ]]; then
       comprobador_menu=1
-      terminar
     else
-      echo "Error, intruduzca un numero del 1 al 5"
+      echo "Error, intruduzca un numero del 1 al 4"
       echo ""
-      pausa
     fi
   done
 }
@@ -201,12 +301,12 @@ limpiar_pool(){
   while [[ $comprobador -eq 0 ]];do
     echo -n "¿Esta seguro? Esto borrara el fichero entero (s/n): "
     read sure
-    if [[ "$sure" =~ ^(s|S)$ ]]; then
+    if [[ "$sure" =~ ^[sS]$ ]]; then
       comprobador=1
       echo "ddns-update-style none;" > /etc/dhcp/dhcpd.conf
       echo "El fichero ha sido limpiado correctamente"
       pasusa
-    elif [[ "$sure" =~ ^(n|N)$ ]]; then
+    elif [[ "$sure" =~ ^[nN]$ ]]; then
       comprobador=1
     else
       echo "Error, intruduzca s (si) o n (no)"
@@ -240,13 +340,13 @@ add_pool() {
   while [[ $comprobador -eq 0 ]];do
     echo -n "¿Quiere añadir servidores DNS? (s/n): "
     read dns
-    if [[ "$dns" =~ ^(s|S)$ ]]; then
+    if [[ "$dns" =~ ^[sS]$ ]]; then
       comprobador=1
       echo -n "Introduzca las IPs de los servidores DNS (separados por coma y espacio): "
       read dns_ip
       echo -n "Introduzca el nombre de dominio del servidor DNS: "
       read dns_name
-    elif [[ "$dns" =~ ^(n|N)$ ]]; then
+    elif [[ "$dns" =~ ^[nN]$ ]]; then
       comprobador=1
     else
       echo "Error, intruduzca s (si) o n (no)"
@@ -257,7 +357,7 @@ add_pool() {
   echo "#Pool $nombre_pool" >> /etc/dhcp/dhcpd.conf
   echo "subnet $red netmask $mascara {" >> /etc/dhcp/dhcpd.conf
   echo "  range $ip_first $ip_last;" >> /etc/dhcp/dhcpd.conf
-  if [[ $dns =~ ^(s|S)$ ]]; then
+  if [[ $dns =~ ^[sS]$ ]]; then
     echo "  option domain-name-servers $dns_ip;" >> /etc/dhcp/dhcpd.conf
     echo '  option domain-name "'$dns_name'";' >> /etc/dhcp/dhcpd.conf
   fi
@@ -285,20 +385,21 @@ add_reserva(){
   echo "}" >> /etc/dhcp/dhcpd.conf
 }
 
-terminar() {
+aplicar_dhcp() {
   echo "Aplicando los cambios..."
   systemctl restart isc-dhcp-server.service 2> /dev/null
   if [[ $? -eq 0 ]]; then
     echo "El servidor dhcp ha sido configurado con exito y esta funcionado"
+    pausa
   else
     echo "Algun error impide el funcionamiento del DHCP. Revisa la configuración"
-    echo ""
+    pausa
   fi
 }
 
 menu_dhcp() {
   comprobador_menu=0
-  while [[ $comprobador_menu -eq 0 ]];do
+  while [[ $comprobador_menu_dhcp -eq 0 ]];do
     limpiar
     echo -e  "\e[36m$(figlet -f pagga.tlf -w 200 "Menu de configuracion del DHCP")\e[0m"
     echo ""
@@ -306,28 +407,33 @@ menu_dhcp() {
     echo "2. Limpiar el fichero de pools del DHCP"
     echo "3. Añadir pool al DHCP"
     echo "4. Añadir reserva al DHCP"
-    echo "5. Aplicar los cambios y salir"
+    echo "5. Entrar al menu de configuración de interfaces"
+    echo "6. Aplicar los cambios"
+    echo "7. Salir"
     echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
-    if [[ "$menu" =~ ^(1)$ ]]; then
+    if [[ "$menu" =~ ^1$ ]]; then
       limpiar
       add_interfaces
-    elif [[ "$menu" =~ ^(2)$ ]]; then
+    elif [[ "$menu" =~ ^2$ ]]; then
       limpiar
       limpiar_pool
-    elif [[ "$menu" =~ ^(3)$ ]]; then
+    elif [[ "$menu" =~ ^3$ ]]; then
       limpiar
       add_pool
-    elif [[ "$menu" =~ ^(4)$ ]]; then
+    elif [[ "$menu" =~ ^4$ ]]; then
       limpiar
       add_reserva
-    elif [[ "$menu" =~ ^(5)$ ]]; then
+    elif [[ "$menu" =~ ^5$ ]]; then
+      menu_interfaces
+    elif [[ "$menu" =~ ^6$ ]]; then
       limpiar
-      comprobador_menu=1
-      terminar
+      aplicar_dhcp
+    elif [[ "$menu" =~ ^7$ ]]; then
+      comprobador_menu_dhcp=1
     else
-      echo "Error, intruduzca un numero del 1 al 5"
+      echo "Error, intruduzca un numero del 1 al 6"
       echo ""
       pausa
     fi
