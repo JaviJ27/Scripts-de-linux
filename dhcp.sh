@@ -1,8 +1,15 @@
 #!/bin/bash
 limpiar(){
   clear
-  figlet -f big -w 200 "INSTALADOR   DHCP" | /usr/games/lolcat
-  }
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "-------------------"
+    echo "| INSTALADOR DHCP |"
+    echo "-------------------"
+    echo ""
+  else
+    figlet -f big -w 200 "INSTALADOR   DHCP" | /usr/games/lolcat
+  fi
+}
 
 pausa(){
   echo ""
@@ -68,18 +75,18 @@ instalar_DHCP() {
 binarios_install() {
   echo ""
   echo "Comprobando si tiene todos los paquetes necesarios..."
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
+    return 1
+  else
+    echo "Todos los paquetes estan instalados"
+    return 0
+  fi
   rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
   wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
   wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
   mv wideterm.tlf /usr/share/figlet/
   mv pagga.tlf /usr/share/figlet/
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" && apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
-    echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
-    return 1
-  else
-    echo "Todos binarios estan instalados"
-    return 0
-  fi
 }
 
 instalar_binarios() {
@@ -90,12 +97,12 @@ instalar_binarios() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
-      echo "Instalando binarios de formato de texto..."
+      echo "Instalando paquetes necesarios..."
       apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
-        echo "Todos los binarios se han instalado con exito"
+        echo "Todos los paquetes se han instalado con exito"
       else
-        echo "Ha ocurrido un error al intentar descargar los binarios necesarios"
+        echo "Ha ocurrido un error al intentar descargar los paquetes necesarios"
         exit 1
       fi
     fi
@@ -207,7 +214,7 @@ add_reserva(){
 
 terminar() {
   echo "Aplicando los cambios..."
-  systemctl restart isc-dhcp-server.service
+  systemctl restart isc-dhcp-server.service 2> /dev/null
   if [[ $? -eq 0 ]]; then
     echo "El servidor dhcp ha sido configurado con exito y esta funcionado"
   else
@@ -253,7 +260,7 @@ menu_dhcp() {
   done
 }
 #-------------------------------------------------------------------
-limpiar
+limpiar 2> /dev/null
 root
 dhcp_install
 instalar_DHCP
