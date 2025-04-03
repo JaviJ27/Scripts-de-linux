@@ -1,8 +1,15 @@
 #!/bin/bash
 limpiar(){
   clear
-  figlet -f big -w 200 "Creador de 128 particiones" | /usr/games/lolcat
-  }
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+    echo "------------------------------"
+    echo "| Creador de 128 particiones |"
+    echo "------------------------------"
+    echo ""
+  else
+    figlet -f big -w 200 "Creador de 128 particiones" | /usr/games/lolcat
+  fi
+}
 
 pausa(){
   echo ""
@@ -69,18 +76,18 @@ instalar_fdisk() {
 binarios_install() {
   echo ""
   echo "Comprobando si tiene todos los paquetes necesarios..."
-  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
-  mv wideterm.tlf /usr/share/figlet/
-  mv pagga.tlf /usr/share/figlet/
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" && apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
     echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
     return 1
   else
-    echo "Todos binarios estan instalados"
+    echo "Todos los paquetes estan instalados"
     return 0
   fi
+  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
+  mv wideterm.tlf /usr/share/figlet/
+  mv pagga.tlf /usr/share/figlet/
 }
 
 instalar_binarios() {
@@ -91,12 +98,12 @@ instalar_binarios() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
-      echo "Instalando binarios de formato de texto..."
+      echo "Instalando los paquete necesarios..."
       apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
-        echo "Todos los binarios se han instalado con exito"
+        echo "Todos los paquetes se han instalado con exito"
       else
-        echo "Ha ocurrido un error al intentar descargar los binarios necesarios"
+        echo "Ha ocurrido un error al intentar descargar los paquetes necesarios"
         exit 1
       fi
     fi
@@ -120,6 +127,13 @@ select_disco() {
     if [[ $? -eq 0 ]];then
       comprobador=0
       while [[ $comprobador -eq 0 ]];do
+	limpiar
+	echo -e "\e[35m$(figlet -f wideterm.tlf "Selecciar el disco que se va a particionar")\e[0m"
+	echo""
+	echo "Estas son las particiones de $disco:"
+	echo "---------------------------------------------"
+	echo -e "\e[1m$(lsblk | grep NAME)\e[0m"
+	lsblk | grep $disco
         echo ""
         echo -n "El progama creara 128 particiones en $disco, esto borrara toda la informacion de dicho disco. ¿Quiere continuar? (s/n): "
         read sure
@@ -156,6 +170,7 @@ select_disco() {
 particionado(){
   limpiar
   echo -e "\e[35m$(figlet -f wideterm.tlf "Particionado del disco")\e[0m"
+  echo ""
   echo "Limpiando disco..."
   sleep 2
   wipefs -a /dev/$disco > /dev/null
