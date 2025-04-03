@@ -15,7 +15,7 @@ pausa(){
   echo ""
   echo -n "Pulse enter para continuar"
   read space
-  }
+}
 
 root() {
   echo "Comprobando que usted tenga permisos de administrador..."
