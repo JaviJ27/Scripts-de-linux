@@ -61,8 +61,8 @@ instalar_fdisk() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
-      echo "Instalando servidor DHCP..."
-      apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      echo "Instalando fdisk..."
+      apt update -y > /dev/null 2> /dev/null && apt install -y isc-dhcp-server > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "fdisk se a instalado con exito"
       else
@@ -99,7 +99,7 @@ instalar_binarios() {
     if [[ $? -eq 0 ]];then
       echo ""
       echo "Instalando los paquete necesarios..."
-      apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
+      apt update -y > /dev/null 2> /dev/null && apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "Todos los paquetes se han instalado con exito"
       else
