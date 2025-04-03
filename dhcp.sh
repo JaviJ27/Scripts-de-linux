@@ -61,7 +61,7 @@ instalar_DHCP() {
     if [[ $? -eq 0 ]];then
       echo ""
       echo "Instalando servidor DHCP..."
-      apt update -y > /dev/null 2> /dev/null && apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y isc-dhcp-server > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "El servidor DHCP se a instalado con exito"
       else
@@ -98,7 +98,7 @@ instalar_binarios() {
     if [[ $? -eq 0 ]];then
       echo ""
       echo "Instalando paquetes necesarios..."
-      apt update -y > /dev/null 2> /dev/null && apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
+      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "Todos los paquetes se han instalado con exito"
       else
