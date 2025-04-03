@@ -83,7 +83,6 @@ binarios_install() {
     echo "Todos los paquetes estan instalados"
     return 0
   fi
-  rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
   wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
   wget https://raw.githubusercontent.com/JaviJ27/Scripts-de-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
   mv wideterm.tlf /usr/share/figlet/
@@ -137,16 +136,16 @@ select_disco() {
         echo ""
         echo -n "El progama creara 128 particiones en $disco, esto borrara toda la informacion de dicho disco. ¿Quiere continuar? (s/n): "
         read sure
-        if [[ "$sure" =~ ^(s|S)$ ]]; then
+        if [[ "$sure" =~ ^[sS]$ ]]; then
           comprobador=1
           comprobador_disco=1
-        elif [[ "$sure" =~ ^(n|N)$ ]]; then
+        elif [[ "$sure" =~ [(nN]$ ]]; then
           echo ""
           echo -n "¿Quiere seleccionar otro disco? (s/n): "
 	  read sure
-          if [[ "$sure" =~ ^(s|S)$ ]]; then
+          if [[ "$sure" =~ ^[sS]$ ]]; then
             comprobador=1
-          elif [[ "$sure" =~ ^(n|N)$ ]]; then
+          elif [[ "$sure" =~ ^[nN]$ ]]; then
             comprobador=1
 	    comprobador_disco=1
 	    exit 1
