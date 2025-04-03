@@ -223,6 +223,7 @@ terminar() {
     echo ""
   fi
 }
+
 menu_dhcp() {
   comprobador_menu=0
   while [[ $comprobador_menu -eq 0 ]];do
