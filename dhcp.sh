@@ -83,8 +83,8 @@ binarios_install() {
     return 0
   fi
   rm /usr/share/figlet/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
-  wget https://raw.githubusercontent.com/JaviJ27/Script-para-configurar-DHCP-en-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-de-linux/refs/heads/main/wideterm.tlf 2> /dev/null > /dev/null
+  wget https://raw.githubusercontent.com/JaviJ27/Script-de-linux/refs/heads/main/pagga.tlf 2> /dev/null > /dev/null
   mv wideterm.tlf /usr/share/figlet/
   mv pagga.tlf /usr/share/figlet/
 }
