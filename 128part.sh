@@ -139,7 +139,7 @@ select_disco() {
         if [[ "$sure" =~ ^[sS]$ ]]; then
           comprobador=1
           comprobador_disco=1
-        elif [[ "$sure" =~ [(nN]$ ]]; then
+        elif [[ "$sure" =~ ^[nN]$ ]]; then
           echo ""
           echo -n "¿Quiere seleccionar otro disco? (s/n): "
 	  read sure
