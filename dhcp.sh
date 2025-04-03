@@ -15,7 +15,7 @@ pausa(){
   echo ""
   echo -n "Pulse enter para continuar"
   read space
-}
+  }
 
 root() {
   echo "Comprobando que usted tenga permisos de administrador..."
@@ -35,8 +35,22 @@ conexion() {
     echo "Tiene una buena conexion"
     return 0
   else
-    echo "Parace que no tiene conxion, compruebe su conexion o intentelo mas tarde"
-    exit 1
+    comprobador=0
+    while [[ $comprobador -eq 0 ]];do
+    echo "Parace que no tiene conxion, ¿Quiere modificar el fichero de interfaces? (s/n): "
+    read sure
+    if [[ "$sure" =~ ^(s|S)$ ]]; then
+      comprobador=1
+      menu_interfaces_sin_conexion
+      pasusa
+    elif [[ "$sure" =~ ^(n|N)$ ]]; then
+      comprobador=1
+      exit 1
+    else
+      echo "Error, intruduzca s (si) o n (no)"
+      echo ""
+    fi
+  done
   fi
 }
 
@@ -108,6 +122,64 @@ instalar_binarios() {
       fi
     fi
   fi
+}
+
+limpiar_interfaces(){
+  limpiar
+  echo ""
+  echo "limpiando el fichero /etc/network/interfaces..."
+  sleep 2
+  echo "source /etc/network/interfaces.d/*" > /etc/network/interfaces
+  echo "" >> /etc/network/interfaces
+  echo "#The loopback network interface" >> /etc/network/interfaces
+  echo "auto lo" >> /etc/network/interfaces
+  echo "iface lo inet loopback" >> /etc/network/interfaces
+  echo "El fichero /etc/network/interfaces se ha "
+}
+
+menu_interfaces_sin_conexion(){
+  limpiar
+  comprobador_menu=0
+  while [[ $comprobador_menu -eq 0 ]];do
+    limpiar
+    if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)";then
+    echo "---------------------------------------"
+    echo "| Menu de Configuracion de Interfaces |"
+    echo "---------------------------------------"
+    echo ""
+    else
+      echo -e  "\e[36m$(figlet -f pagga.tlf -w 200 "Menu de configuracion de interfaces")\e[0m"
+    fi
+    echo ""
+    echo "1. Limpiar fichero de interfaces"
+    echo "2. Añadir nueva configuracion de interfaz"
+    echo "3. Eliminar la configuración de una interfaz"
+    echo "4. Aplicar los cambios y continuar con la instalación"
+    echo ""
+    echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
+    read menu
+    if [[ "$menu" =~ ^(1)$ ]]; then
+      limpiar
+      add_interfaces
+    elif [[ "$menu" =~ ^(2)$ ]]; then
+      limpiar
+      limpiar_pool
+    elif [[ "$menu" =~ ^(3)$ ]]; then
+      limpiar
+      add_pool
+    elif [[ "$menu" =~ ^(4)$ ]]; then
+      limpiar
+      add_reserva
+    elif [[ "$menu" =~ ^(5)$ ]]; then
+      limpiar
+      comprobador_menu=1
+      terminar
+    else
+      echo "Error, intruduzca un numero del 1 al 5"
+      echo ""
+      pausa
+    fi
+  done
 }
 
 add_interfaces(){
