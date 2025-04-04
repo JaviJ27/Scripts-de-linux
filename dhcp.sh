@@ -265,8 +265,9 @@ menu_interfaces(){
     echo "1. Limpiar fichero de interfaces"
     echo "2. Añadir nueva configuracion de interfaz"
     echo "3. Ver fichero de interfaces"
-    echo "4. Aplicar cambios"
-    echo "5. Salir"
+    echo "4. Ver interfaces disponibes"
+    echo "5. Aplicar cambios"
+    echo "6. Salir"
     echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
@@ -279,11 +280,17 @@ menu_interfaces(){
       limpiar
       ver_interfaces
     elif [[ "$menu" =~ ^4$ ]]; then
-      aplicar_interfaces
+      limpiar
+        echo "Interfaces disponibles"
+        echo "----------------------"
+        ip a | grep -o "[0-9]: [a-zA-Z0-9]*"
+        pausa
     elif [[ "$menu" =~ ^5$ ]]; then
+      aplicar_interfaces
+    elif [[ "$menu" =~ ^6$ ]]; then
       comprobador_menu=1
     else
-      echo "Error, intruduzca un numero del 1 al 4"
+      echo "Error, intruduzca un numero del 1 al 6"
       echo ""
     fi
   done
