@@ -41,12 +41,12 @@ conexion() {
     else
       comprobador=0
       while [[ $comprobador -eq 0 ]];do
-        echo -n "Parace que no tiene conxion, ¿Quiere modificar el fichero de interfaces? (s/n): "
+        echo -n "Parace que no tiene conxion, ¿Quiere entrar al menu de configuración de interfaces? (s/n): "
         read sure
         if [[ "$sure" =~ ^[sS]$ ]];then
           comprobador=1
 	  menu_interfaces
-	  limpair
+	  limpiar
         elif [[ "$sure" =~ ^[nN]$ ]]; then
           comprobador=1
         else
@@ -234,6 +234,10 @@ nueva_interfaz(){
   done
 }
 
+ver_interfaces(){
+  less /etc/network/interfaces
+}
+
 aplicar_interfaces() {
   echo "Aplicando los cambios..."
   systemctl restart networking.service 2> /dev/null
@@ -254,15 +258,15 @@ menu_interfaces(){
     echo "---------------------------------------"
     echo "| Menu de Configuracion de Interfaces |"
     echo "---------------------------------------"
-    echo ""
     else
       echo -e  "\e[36m$(figlet -f pagga.tlf -w 200 "Menu de configuracion de interfaces")\e[0m"
     fi
     echo ""
     echo "1. Limpiar fichero de interfaces"
     echo "2. Añadir nueva configuracion de interfaz"
-    echo "3. Aplicar cambios"
-    echo "4. Salir"
+    echo "3. Ver fichero de interfaces"
+    echo "4. Aplicar cambios"
+    echo "5. Salir"
     echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
@@ -272,8 +276,11 @@ menu_interfaces(){
     elif [[ "$menu" =~ ^2$ ]]; then
       nueva_interfaz
     elif [[ "$menu" =~ ^3$ ]]; then
-      aplicar_interfaces
+      limpiar
+      ver_interfaces
     elif [[ "$menu" =~ ^4$ ]]; then
+      aplicar_interfaces
+    elif [[ "$menu" =~ ^5$ ]]; then
       comprobador_menu=1
     else
       echo "Error, intruduzca un numero del 1 al 4"
@@ -313,6 +320,10 @@ limpiar_pool(){
       echo ""
     fi
   done
+}
+
+ver_pool(){
+  less /etc/dhcp/dhcpd.conf
 }
 
 add_pool() {
@@ -407,9 +418,10 @@ menu_dhcp() {
     echo "2. Limpiar el fichero de pools del DHCP"
     echo "3. Añadir pool al DHCP"
     echo "4. Añadir reserva al DHCP"
-    echo "5. Entrar al menu de configuración de interfaces"
-    echo "6. Aplicar los cambios"
-    echo "7. Salir"
+    echo "5. Ver fichero de pools"
+    echo "6. Entrar al menu de configuración de interfaces"
+    echo "7. Aplicar los cambios"
+    echo "8. Salir"
     echo ""
     echo -n "Introduzca un numero del menu segun la accion que quiera realizar: "
     read menu
@@ -426,15 +438,17 @@ menu_dhcp() {
       limpiar
       add_reserva
     elif [[ "$menu" =~ ^5$ ]]; then
-      menu_interfaces
+      limpiar
+      ver_pool
     elif [[ "$menu" =~ ^6$ ]]; then
+      menu_interfaces
+    elif [[ "$menu" =~ ^7$ ]]; then
       limpiar
       aplicar_dhcp
-    elif [[ "$menu" =~ ^7$ ]]; then
+    elif [[ "$menu" =~ ^8$ ]]; then
       comprobador_menu_dhcp=1
     else
-      echo "Error, intruduzca un numero del 1 al 6"
-      echo ""
+      echo "Error, intruduzca un numero del 1 al 8"
       pausa
     fi
   done
