@@ -93,8 +93,13 @@ instalar_DHCP() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
+      echo "Buscando actualizaciones..."
+      apt update -y > /dev/null 2> /dev/null
+      echo "Actualizando el sistema..."
+      echo ""
+      apt upgrade -y > /dev/null 2> /dev/null 
       echo "Instalando servidor DHCP..."
-      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      apt install -y isc-dhcp-server > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "El servidor DHCP se a instalado con exito"
       else
