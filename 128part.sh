@@ -61,8 +61,12 @@ instalar_fdisk() {
     conexion
     if [[ $? -eq 0 ]];then
       echo ""
+      echo "Buscando actualizaciones..."
+      apt update -y > /dev/null 2> /dev/null
+      echo "Actualizando el sistema..."
+      apt upgrade -y > /dev/null 2> /dev/null
       echo "Instalando fdisk..."
-      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      apt install -y isc-dhcp-server > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "fdisk se a instalado con exito"
       else
@@ -109,6 +113,16 @@ instalar_binarios() {
   fi
 }
 
+comprobar_gpt(){
+    local tipo=$(fdisk -l /dev/sda | grep "Tipo de etiqueta" | awk '{print $NF}')
+    if [[ $tipo = "dos" ]]; then
+        echo "Este disco $disco está en MBR"
+        echo "Para ejecutar el script es necesario pasarlo a GPT"
+    else
+        echo "El disco $disco está en GPT"
+    fi
+}
+
 select_disco() {
   comprobador_disco=0
   while [[ $comprobador_disco -eq 0 ]];do
@@ -134,7 +148,8 @@ select_disco() {
 	echo -e "\e[1m$(lsblk | grep NAME)\e[0m"
 	lsblk | grep $disco
         echo ""
-        echo -n "El progama creara 128 particiones en $disco, esto borrara toda la informacion de dicho disco. ¿Quiere continuar? (s/n): "
+	comprobar_gpt
+        echo -n "El progama borrara toda la informacion del disco $disco, lo pasara a GPT en caso de no estarlo y creara 128 particiones en. ¿Quiere continuar? (s/n): "
         read sure
         if [[ "$sure" =~ ^[sS]$ ]]; then
           comprobador=1
@@ -175,8 +190,9 @@ particionado(){
   wipefs -a /dev/$disco > /dev/null
   echo -e "g\nw" | fdisk /dev/sdb > /dev/null
   echo "Creando particiones..."
-  for i in {1..128};do
-    echo -e "n\n$i\n\n+1K\nw" | fdisk /dev/sdb > /dev/null 2> /dev/null
+  for ((i=1;i<=128;i+=1))
+    do
+      echo -e "n\n$i\n\n+1K\nw" | fdisk /dev/sdb 2> /dev/null
   done
   if [[ $? -eq 0 ]];then
     echo ""
