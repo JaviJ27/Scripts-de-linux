@@ -1,0 +1,322 @@
+clear
+echo "-----------------------"
+echo "|  Base de datos :´)  |"
+echo "-----------------------"
+echo Introduzca un numero para seleccionar el SGBD:
+echo 1. MariaDB
+echo 2. PostgreSQL
+echo 3. OracleDB
+# Función para validar el número y determinar la edad
+validar_cadena() {
+	if [[ $sgdb -eq 1 ]]; then
+		clear
+		echo "---------------------------"
+		echo "| Base de datos: MariaDB  |"
+		echo "---------------------------"
+		echo ""
+		echo "Estos son los usuarios disponibles: "
+		resultado=$(mysql -u"usuario" -p"usuario" -e "SELECT User AS 'Usuario', Host AS 'Host' FROM mysql.user;" 2>/dev/null)
+		echo "$resultado" | awk '
+		BEGIN {
+		print "+----------------+----------------+"
+		print "| Usuario        | Host           |"
+		print "+----------------+----------------+"
+		}
+		NR>1 {
+		printf("| %-14s | %-14s |\n", $1, $2)
+		}
+		END {
+		print "+----------------+----------------+"
+		}'
+		echo ""
+		echo -n "Introduzca el usuario con el que desea conectarse: "
+       	        read user
+		echo -n "Intoduzca la contraseña del usuario: "
+		read -s passwd
+		echo ""
+		mysql -u"$user" -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error > null
+		if [[ -s error ]]; then
+			echo ""
+	        else
+			clear
+			echo "---------------------------"
+			echo "| Base de datos: MariaDB  |"
+			echo "---------------------------"
+			echo ""
+			echo "Estas son las bases de datos a las que tiene acceso su usuario: "
+			mysql -u"$user" -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error
+			echo ""
+			echo -n "Introduzca la base de datos en la que va a trabajar: "
+        	        read base
+			clear
+			mysql -u"$user" -p $base -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error > null
+			if [[ -s error ]]; then
+				clear
+			else
+				clear
+		        	mariadb -u"$user" -p $base -p"$passwd"
+				clear
+			fi
+		fi
+		validar_conexion() {
+		echo > error
+		}
+		while true; do
+        		if [[ -s error ]]; then
+				clear
+				echo "---------------------------"
+	                        echo "| Base de datos: MariaDB  |"
+        	                echo "---------------------------"
+                	        echo ""
+				echo "Ha ocurrido un error, vuelva a introducir los datos"
+				echo ""
+				echo "Estos son los usuarios disponibles: "
+				resultado=$(mysql -u"usuario" -p"usuario" -e "SELECT User AS 'Usuario', Host AS 'Host' FROM mysql.user;" 2>/dev/null)
+				echo "$resultado" | awk '
+				BEGIN {
+				print "+----------------+----------------+"
+				print "| Usuario        | Host           |"
+				print "+----------------+----------------+"
+				}
+				NR>1 {
+				printf("| %-14s | %-14s |\n", $1, $2)
+				}
+				END {
+				print "+----------------+----------------+"
+				}'
+				echo ""
+	                	echo -n "Introduzca el usuario con el que desea conectarse: "
+        	                read user
+	        	        echo -n "Intoduzca la contraseña del usuario: "
+                        	read -s passwd
+	        	        echo ""
+				echo ""
+                		mysql -u"$user" -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error > null
+		        	if [[ -s error ]]; then
+                			echo ""
+				else
+					clear
+					echo "---------------------------"
+					echo "| Base de datos: MariaDB  |"
+					echo "---------------------------"
+					echo ""
+					echo "Estas son las bases de datos a las que tiene acceso su usuario:"
+					mysql -u"$user" -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error
+					echo ""
+               				echo -n "Introduzca la base de datos en la que va a trabajar: "
+		                        read base
+					mysql -u"$user" -p $base -p"$passwd" -e "SELECT SCHEMA_NAME AS 'Bases de datos' FROM INFORMATION_SCHEMA.SCHEMATA;" --table 2> error > null
+					if [[ -s error ]]; then
+						clear
+        				else
+		        		        clear
+						mariadb -u"$user" -p $base -p"$passwd"
+	                        		clear
+        				fi
+	       			fi
+			else
+        	        	validar_conexion && break
+		        fi
+		done
+
+	elif [[ $sgdb -eq 2 ]]; then
+		clear
+		echo "------------------------------"
+		echo "| Base de datos: PostgreSQL  |"
+		echo "------------------------------"
+		echo ""
+		echo "Estos son los usuarios disponibles: "
+		export PGPASSWORD=usuario
+		resultado=$(psql -U "usuario" -d "postgres" -h localhost -t -c "
+		SELECT u.usename AS Usuario,
+			COALESCE(a.client_addr::TEXT, 'localhost') AS Host
+		FROM pg_user u
+		LEFT JOIN pg_stat_activity a ON u.usename = a.usename;" 2>/dev/null)
+		echo "+----------------+----------------+"
+		echo "| Usuario        | Host           |"
+		echo "+----------------+----------------+"
+		echo "$resultado" | while read -r line; do
+			if [[ -n $line ]]; then
+			usuario=$(echo "$line" | awk '{print $1}')
+			host=$(echo "$line" | awk '{$1=""; print $0}' | xargs) # Ignorar espacios en blanco
+			printf "| %-14s %-14s   |\n" "$usuario" "$host"
+			fi
+		done
+		echo "+----------------+----------------+"
+		unset PGPASSWORD
+		echo ""
+		echo -n "Introduzca el usuario con el que desea conectarse: "
+       	        read user
+		echo -n "Intoduzca la contraseña del usuario: "
+		read -s passwd
+		echo ""
+		export PGPASSWORD=$passwd
+		psql -U "$user" -h localhost -d postgres -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" > null 2> error
+		if [[ -s error ]]; then
+			echo ""
+	        else
+			clear
+			echo "------------------------------"
+			echo "| Base de datos: PostgreSQL  |"
+			echo "------------------------------"
+			echo ""
+			echo "Estas son las bases de datos a las que tiene acceso su usuario: "
+			export PGPASSWORD=$passwd
+			psql -U "$user" -h localhost -d postgres -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" 2> error
+			echo -n "Introduzca la base de datos en la que va a trabajar: "
+        	        read base
+			clear
+			export PGPASSWORD=$passwd
+			psql -U "$user" -h localhost -d $base -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" 2> error 2> error > null
+			if [[ -s error ]]; then
+				clear
+			else
+				clear
+				export PGPASSWORD=$passwd
+		        	psql -U "$user" -h localhost -d $base
+				clear
+			fi
+		fi
+		validar_conexion() {
+		unset PGPASSWORD
+		echo > error
+		}
+		while true; do
+        		if [[ -s error ]]; then
+				clear
+				echo "------------------------------"
+				echo "| Base de datos: PostgreSQL  |"
+				echo "------------------------------"
+                	        echo ""
+				echo "Ha ocurrido un error, vuelva a introducir los datos"
+				echo ""
+				echo "Estos son los usuarios disponibles: "
+				export PGPASSWORD=usuario
+				resultado=$(psql -U "usuario" -d "postgres" -h localhost -t -c "
+				SELECT u.usename AS Usuario,
+					COALESCE(a.client_addr::TEXT, 'localhost') AS Host
+				FROM pg_user u
+				LEFT JOIN pg_stat_activity a ON u.usename = a.usename;" 2>/dev/null)
+				echo "+----------------+----------------+"
+				echo "| Usuario        | Host           |"
+				echo "+----------------+----------------+"
+				echo "$resultado" | while read -r line; do
+					if [[ -n $line ]]; then
+					usuario=$(echo "$line" | awk '{print $1}')
+					host=$(echo "$line" | awk '{$1=""; print $0}' | xargs) # Ignorar espacios en blanco
+					printf "| %-14s %-14s   |\n" "$usuario" "$host"
+					fi
+				done
+				echo "+----------------+----------------+"
+				unset PGPASSWORD
+				echo ""
+	                	echo -n "Introduzca el usuario con el que desea conectarse: "
+        	                read user
+	        	        echo -n "Intoduzca la contraseña del usuario: "
+                        	read -s passwd
+	        	        echo ""
+				echo ""
+				export PGPASSWORD=$passwd
+                		psql -U "$user" -h localhost -d postgres -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" 2> error 2> error > null
+		        	if [[ -s error ]]; then
+                			echo ""
+				else
+					clear
+					echo "------------------------------"
+					echo "| Base de datos: PostgreSQL  |"
+					echo "------------------------------"
+					echo ""
+					echo "Estas son las bases de datos a las que tiene acceso su usuario:"
+					export PGPASSWORD=$passwd
+					psql -U "$user" -h localhost -d postgres -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" 2> error 2> error
+               				echo -n "Introduzca la base de datos en la que va a trabajar: "
+		                        read base
+					export PGPASSWORD=$passwd
+					psql -U "$user" -h localhost -d $base -P border=2 -P footer=off -c "SELECT datname AS \"Bases de datos\" FROM pg_database WHERE datistemplate = false;" 2> error 2> error > null
+					if [[ -s error ]]; then
+						clear
+        				else
+		        		        clear
+						export PGPASSWORD=$passwd
+						psql -U "$user" -h localhost -d $base
+	                        		clear
+        				fi
+	       			fi
+			else
+        	        	validar_conexion && break
+		        fi
+		done
+
+	elif [[ $sgdb -eq 3 ]]; then
+		clear
+		echo "----------------------------"
+		echo "| Base de datos: OracleDB  |"
+		echo "----------------------------"
+		echo ""
+		echo "Estos son los usuarios disponibles:"
+
+		# Listar usuarios disponibles
+		sqlplus -s "DMLP1/root@//172.22.8.209:1521/XE" <<EOF | grep -Ev "XS\$NULL|SQL|Version|Copyright|Connected|Oracle|^[[:space:]]*$"
+SET LINESIZE 100
+SET PAGESIZE 50
+SET FEEDBACK OFF
+COLUMN "Usuarios" FORMAT A20
+SELECT USERNAME AS "Usuarios" FROM ALL_USERS WHERE USERNAME NOT IN ('XS\$NULL','APEX_040000','APEX_PUBLIC_USER','FLOWS_FILES','HR','MDSYS','ANONYMOUS','XDB','CTXSYS','APPQOSSYS','DBSNMP','ORACLE_OCM','DIP','OUTLN','SYSTEM','SYS');
+EXIT;
+EOF
+
+		while true; do
+			echo ""
+			echo -n "Introduzca el usuario con el que desea conectarse: "
+			read user
+			echo -n "Introduzca la contraseña del usuario: "
+			read -s passwd
+			echo ""
+
+			#Intentar conexión
+			sqlplus -s "$user/$passwd@//172.22.8.209:1521/XE" <<EOF > /dev/null
+SET LINESIZE 100
+SET PAGESIZE 50
+SET FEEDBACK OFF
+SELECT 1 FROM DUAL;
+EXIT;
+EOF
+
+			# Verificar si la conexión fue exitosa
+			if [ $? -eq 0 ]; then
+				clear
+				sqlplus "$user/$passwd@//172.22.8.209:1521/XE"
+				break
+			else
+			        clear
+		        	echo "----------------------------"
+			        echo "| Base de datos: OracleDB  |"
+		        	echo "----------------------------"
+			        echo ""
+		        	echo "Error: Usuario o contraseña incorrectos. Vuelva a intentarlo."
+			        echo ""
+		        	echo "Estos son los usuarios disponibles:"
+				#Mostrar usuarios nuevamente
+			        sqlplus -s "DMLP1/root@//172.22.8.209:1521/XE" <<EOF | grep -Ev "XS\$NULL|SQL|Version|Copyright|Connected|Oracle|^[[:space:]]*$"
+SET LINESIZE 100
+SET PAGESIZE 50
+SET FEEDBACK OFF
+COLUMN "Usuarios" FORMAT A20
+SELECT USERNAME AS "Usuarios" FROM ALL_USERS WHERE USERNAME NOT IN ('XS\$NULL','APEX_040000','APEX_PUBLIC_USER','FLOWS_FILES','HR','MDSYS','ANONYMOUS','XDB','CTXSYS','APPQOSSYS','DBSNMP','ORACLE_OCM','DIP','OUTLN','SYSTEM','SYS');
+EXIT;
+EOF
+			fi
+		done
+
+	fi
+}
+while true; do
+        echo -n "Introduzca el numero correspondiente: "
+        read sgdb
+        if [[ $sgdb -ge 1 && $sgdb -le 3 ]]; then
+                validar_cadena && break
+        else
+                echo "Numero invalido, introduzca un numero del 1 al 3"
+                echo ""
+        fi
+done
