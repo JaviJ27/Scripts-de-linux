@@ -392,21 +392,30 @@ add_pool() {
 }
 
 add_reserva(){
-  echo -e "\e[35m$(figlet -f wideterm.tlf "Añadir nueva reserva")\e[0m"
-  echo ""
-  echo -n "Introduzca el nombre del equipo para la reserva sin espacios: "
-  read nombre_reserva
-  echo -n "Introduzca la MAC del equipo de la reserva: "
-  read mac
-  echo -n "Introduzca la IP o el nombre del equipo de la reserva: "
-  read ip
-  echo "" >> /etc/dhcp/dhcpd.conf
-  echo "#Reserva para el equipo: $nombre_reserva" >> /etc/dhcp/dhcpd.conf
-  echo "host $nombre_reserva {" >> /etc/dhcp/dhcpd.conf
-  echo "  hardware ethernet $mac;" >> /etc/dhcp/dhcpd.conf
-  echo "  fixed-address $ip;" >> /etc/dhcp/dhcpd.conf
-  echo "}" >> /etc/dhcp/dhcpd.conf
+  read -p "Introduzca el nombre del equipo: " nombre
+  read -p "Introduzca la MAC de tu equipo: " dirMAC
+  read -p "Introduzca la IP de tu equipo: " dirIP
+  echo -e "\nhost $nombre {" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "  hardware ethernet $dirMAC" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "  fixed-address $dirIP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "}" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/nul
 }
+
+añadir_reserva(){
+  read -p "Introduzca el nombre del equipo: " nombre
+  read -p "Introduzca la MAC de tu equipo: " dirMAC
+  read -p "Introduzca la IP de tu equipo: " dirIP
+  echo -e "\nhost $nombre {" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "  hardware ethernet $dirMAC" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "  fixed-address $dirIP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+  echo -e "}" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+}
+
+
+
+
+
+
 
 aplicar_dhcp() {
   echo "Aplicando los cambios..."
