@@ -40,6 +40,16 @@ conexion() {
   fi
 }
 
+actualizar() {
+  echo ""
+  echo "Buscando actualizaciones..."
+  echo ""
+  apt update -y > /dev/null 2> /dev/null
+  echo "Actualizando el sistema..."
+  echo ""
+  apt upgrade -y > /dev/null 2> /dev/null 
+}
+
 fdisk_install() {
   echo ""
   echo "Comprobando si tiene fdisk instalado..."
@@ -60,11 +70,7 @@ instalar_fdisk() {
     sleep 2
     conexion
     if [[ $? -eq 0 ]];then
-      echo ""
-      echo "Buscando actualizaciones..."
-      apt update -y > /dev/null 2> /dev/null
-      echo "Actualizando el sistema..."
-      apt upgrade -y > /dev/null 2> /dev/null
+      actualizar
       echo "Instalando fdisk..."
       apt install -y isc-dhcp-server > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
