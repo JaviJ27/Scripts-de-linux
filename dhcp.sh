@@ -74,6 +74,16 @@ conexion() {
   done
 }
 
+actualizar() {
+  echo ""
+  echo "Buscando actualizaciones..."
+  echo ""
+  apt update -y > /dev/null 2> /dev/null
+  echo "Actualizando el sistema..."
+  echo ""
+  apt upgrade -y > /dev/null 2> /dev/null 
+}
+
 dhcp_install() {
   echo ""
   echo "Comprobando si tiene el servidor DHCP instalado..."
@@ -92,13 +102,7 @@ instalar_DHCP() {
     echo ""
     conexion
     if [[ $? -eq 0 ]];then
-      echo ""
-      echo "Buscando actualizaciones..."
-      echo ""
-      apt update -y > /dev/null 2> /dev/null
-      echo "Actualizando el sistema..."
-      echo ""
-      apt upgrade -y > /dev/null 2> /dev/null 
+      actualizar
       echo "Instalando servidor DHCP..."
       dmesg -n 1
       apt install -y isc-dhcp-server > /dev/null 2> /dev/null
@@ -130,9 +134,9 @@ instalar_binarios() {
     echo ""
     conexion
     if [[ $? -eq 0 ]];then
-      echo ""
+      actualizar
       echo "Instalando paquetes necesarios..."
-      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
+      apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "Todos los paquetes se han instalado con exito"
       else
