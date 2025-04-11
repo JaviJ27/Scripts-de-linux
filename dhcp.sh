@@ -324,11 +324,11 @@ limpiar_pool(){
   echo -e "\e[35m$(figlet -f wideterm.tlf "Limpiar pools")\e[0m"
   echo ""
   read -p "¿Esta seguro? Esto borrara el fichero entero (s/n): " sure
-  while [[ $sure != [sSnN] ]]; do 
+  while [[ $sure != [sSnN] ]]; do
     read -p "Error, intruduzca s (si) o n (no): " sure
     echo ""
   done
-  if [[ $pregunta = [sS] ]]; then
+  if [[ $sure = [sS] ]]; then
     echo "ddns-update-style none;" > /etc/dhcp/dhcpd.conf
     echo "El fichero ha sido limpiado correctamente"
     pausa
@@ -402,7 +402,7 @@ add_reserva(){
   echo -e "}" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/nul
 }
 
-añadir_reserva(){
+añadir_reserva() {
   read -p "Introduzca el nombre del equipo: " nombre
   read -p "Introduzca la MAC de tu equipo: " dirMAC
   read -p "Introduzca la IP de tu equipo: " dirIP
