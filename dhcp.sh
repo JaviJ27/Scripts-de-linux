@@ -392,17 +392,7 @@ add_pool() {
   echo "}" >> /etc/dhcp/dhcpd.conf
 }
 
-add_reserva(){
-  read -p "Introduzca el nombre del equipo: " nombre
-  read -p "Introduzca la MAC de tu equipo: " dirMAC
-  read -p "Introduzca la IP de tu equipo: " dirIP
-  echo -e "\nhost $nombre {" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
-  echo -e "  hardware ethernet $dirMAC" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
-  echo -e "  fixed-address $dirIP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
-  echo -e "}" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/nul
-}
-
-añadir_reserva() {
+add_reserva() {
   read -p "Introduzca el nombre del equipo: " nombre
   read -p "Introduzca la MAC de tu equipo: " dirMAC
   read -p "Introduzca la IP de tu equipo: " dirIP
@@ -411,12 +401,6 @@ añadir_reserva() {
   echo -e "  fixed-address $dirIP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
   echo -e "}" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
 }
-
-
-
-
-
-
 
 aplicar_dhcp() {
   echo "Aplicando los cambios..."
