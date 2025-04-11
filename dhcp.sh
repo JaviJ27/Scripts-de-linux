@@ -1,7 +1,7 @@
 #!/bin/bash
 limpiar(){
   clear
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+  if apt policy figlet 2> /dev/null | egrep -qoe "(ninguno)|(none)" || apt policy lolcat 2> /dev/null | egrep -qoe "(ninguno)|(none)"; then
     echo "-------------------"
     echo "| INSTALADOR DHCP |"
     echo "-------------------"
