@@ -94,8 +94,8 @@ instalar_DHCP() {
     if [[ $? -eq 0 ]];then
       echo ""
       echo "Buscando actualizaciones..."
-      apt update -y > /dev/null 2> /dev/null
       echo ""
+      apt update -y > /dev/null 2> /dev/null
       echo "Actualizando el sistema..."
       echo ""
       apt upgrade -y > /dev/null 2> /dev/null 
