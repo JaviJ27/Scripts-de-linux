@@ -316,22 +316,16 @@ add_interfaces(){
 limpiar_pool(){
   echo -e "\e[35m$(figlet -f wideterm.tlf "Limpiar pools")\e[0m"
   echo ""
-  comprobador=0
-  while [[ $comprobador -eq 0 ]];do
-    echo -n "¿Esta seguro? Esto borrara el fichero entero (s/n): "
-    read sure
-    if [[ "$sure" =~ ^[sS]$ ]]; then
-      comprobador=1
-      echo "ddns-update-style none;" > /etc/dhcp/dhcpd.conf
-      echo "El fichero ha sido limpiado correctamente"
-      pasusa
-    elif [[ "$sure" =~ ^[nN]$ ]]; then
-      comprobador=1
-    else
-      echo "Error, intruduzca s (si) o n (no)"
-      echo ""
-    fi
+  read -p "¿Esta seguro? Esto borrara el fichero entero (s/n): " sure
+  while [[ $sure != [sSnN] ]]; do 
+    read -p "Error, intruduzca s (si) o n (no): " sure
+    echo ""
   done
+  if [[ $pregunta = [sS] ]]; then
+    echo "ddns-update-style none;" > /etc/dhcp/dhcpd.conf
+    echo "El fichero ha sido limpiado correctamente"
+    pausa
+  fi
 }
 
 ver_pool(){
