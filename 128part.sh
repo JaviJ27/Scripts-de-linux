@@ -198,7 +198,7 @@ particionado(){
   echo "Creando particiones..."
   for ((i=1;i<=128;i+=1))
     do
-      echo -e "n\n$i\n\n+1K\nw" | fdisk /dev/sdb 2> /dev/null
+      echo -e "n\n$i\n\n+1K\nw" | fdisk /dev/sdb 2> /dev/null > /dev/null
   done
   if [[ $? -eq 0 ]];then
     echo ""
