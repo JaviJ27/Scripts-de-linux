@@ -100,7 +100,9 @@ instalar_DHCP() {
       echo ""
       apt upgrade -y > /dev/null 2> /dev/null 
       echo "Instalando servidor DHCP..."
+      dmesg -n 1
       apt install -y isc-dhcp-server > /dev/null 2> /dev/null
+      dmesg -n 7
       if [[ $? -eq 0 ]];then
         echo "El servidor DHCP se a instalado con exito"
       else
