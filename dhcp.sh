@@ -1,7 +1,7 @@
 #!/bin/bash
 limpiar(){
   clear
-  if apt policy figlet 2> /dev/null | egrep -qoe "(ninguno)|(none)" || apt policy lolcat 2> /dev/null | egrep -qoe "(ninguno)|(none)"; then
+  if apt policy figlet 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)" || apt policy lolcat 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)"; then
     echo "-------------------"
     echo "| INSTALADOR DHCP |"
     echo "-------------------"
@@ -78,7 +78,7 @@ dhcp_install() {
   echo ""
   echo "Comprobando si tiene el servidor DHCP instalado..."
   sleep 2
-  if apt policy isc-dhcp-server 2> /dev/null | grep -qoe "(ninguno)"; then
+  if apt policy isc-dhcp-server 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)"; then
     echo "El servidor DHCP no esta instalado, a si que vamos a intentar instalarlo"
     return 1
   else
@@ -113,7 +113,7 @@ instalar_DHCP() {
 binarios_install() {
   echo ""
   echo "Comprobando si tiene todos los paquetes necesarios..."
-  if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)" || apt policy lolcat 2> /dev/null | grep -qoe "(ninguno)"; then
+  if apt policy figlet 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)" || apt policy lolcat 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)"; then
     echo "Parece que falta algun paquete, a si que vamos a intentar instalarlo"
     return 1
   else
@@ -259,7 +259,7 @@ menu_interfaces(){
   comprobador_menu=0
   while [[ $comprobador_menu -eq 0 ]];do
     limpiar
-    if apt policy figlet 2> /dev/null | grep -qoe "(ninguno)";then
+    if apt policy figlet 2> /dev/null | egrep -qoe "\(ninguno\)|\(none\)";then
     echo "---------------------------------------"
     echo "| Menu de Configuracion de Interfaces |"
     echo "---------------------------------------"
