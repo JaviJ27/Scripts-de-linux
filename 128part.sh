@@ -106,9 +106,9 @@ instalar_binarios() {
     sleep 2
     conexion
     if [[ $? -eq 0 ]];then
-      echo ""
+      actualizar
       echo "Instalando los paquete necesarios..."
-      apt update -y > /dev/null 2> /dev/null && apt upgrade -y > /dev/null 2> /dev/null && apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
+      apt install -y figlet > /dev/null 2> /dev/null && apt install -y lolcat > /dev/null 2> /dev/null
       if [[ $? -eq 0 ]];then
         echo "Todos los paquetes se han instalado con exito"
       else
