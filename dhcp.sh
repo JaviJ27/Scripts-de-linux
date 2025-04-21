@@ -39,31 +39,31 @@ conexion() {
       comprobador_internet=1
       return 0
     else
-      comprobador=0
-      while [[ $comprobador -eq 0 ]];do
+      comprobador1=0
+      while [[ $comprobador1 -eq 0 ]];do
         echo -n "Parace que no tiene conxion, ¿Quiere entrar al menu de configuración de interfaces? (s/n): "
         read sure
         if [[ "$sure" =~ ^[sS]$ ]];then
-          comprobador=1
+          comprobador1=1
 	  menu_interfaces
 	  limpiar
         elif [[ "$sure" =~ ^[nN]$ ]]; then
-          comprobador=1
+          comprobador1=1
         else
           echo "Error, intruduzca s (si) o n (no)"
           echo ""
-	  comprobador=0
+	  comprobador1=0
         fi
       done
-      comprobador=0
-      while [[ $comprobador -eq 0 ]];do
+      comprobador2=0
+      while [[ $comprobador2 -eq 0 ]];do
         echo -n "¿Quiere reintentar la conexion? (s/n): "
         read sure
         if [[ "$sure" =~ ^[sS]$ ]]; then
           limpiar
-          comprobador=1
+          comprobador2=1
         elif [[ "$sure" =~ ^[nN]$ ]]; then
-          comprobador=1
+          comprobador2=1
           exit 1
         else
           echo "Error, intruduzca s (si) o n (no): "
