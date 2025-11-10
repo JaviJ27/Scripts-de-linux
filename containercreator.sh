@@ -86,9 +86,6 @@ configrar_contenedor_debian(){
   echo "La configuración se ha completado con exito"
   pausa
   limpiar
-  echo "Esta es la información de su nuevo contenedor"
-  lxc-info $container_name
-  echo ""
 }
 
 configrar_contenedor_ubuntu(){
@@ -117,9 +114,6 @@ configrar_contenedor_ubuntu(){
   echo "La configuración se ha completado con exito"
   pausa
   limpiar
-  echo "Esta es la información de su nuevo contenedor"
-  lxc-info $container_name
-  echo ""
 }
 
 configrar_contenedor_rhel(){
@@ -147,7 +141,6 @@ configrar_contenedor_rhel(){
   echo "La configuración se ha completado con exito"
   pausa
   limpiar
-  echo ""
 }
 
 configurar_hosts(){
