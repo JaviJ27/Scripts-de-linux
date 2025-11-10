@@ -147,9 +147,19 @@ configrar_contenedor_rhel(){
   echo "La configuración se ha completado con exito"
   pausa
   limpiar
+  echo ""
+}
+
+configurar_hosts(){
+  IP_LXC=$(sudo lxc-info $container_name | egrep -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
+  printf "192.168.1.10\t$container_name\n" >> /etc/hosts
+}
+
+imprimir_info(){
   echo "Esta es la información de su nuevo contenedor"
   lxc-info $container_name
   echo ""
+  echo "Puede conectarse a su contenedor con ssh usuario@$container_name"
 }
 
 #----------------------------------------------------------------------------------------------------------------
@@ -166,3 +176,5 @@ elif [[ $DISTRO =~ ^(Fedora|Centos|Rockylinux|Almalinux)$ ]];then
 else
   echo "Este script no puede configurar la distro seleccionada"
 fi
+configurar_hosts
+imprimir_info
