@@ -35,7 +35,13 @@ crear_contenedor(){
   echo -n "Introduzca el nombre del contenedor: "
   read container_name
   echo ""
-  lxc-create -n $container_name -t download | tee /tmp/$container_name.txt
+  lxc-create -n $container_name -t download 2>/var/log/containercreator | tee /tmp/$container_name.txt
+  cat /tmp/$container_name.txt | grep ERROR >/dev/null 2>/dev/null
+  if [[ $? -eq 0 ]];then
+    echo ""
+    echo "Configuración fallida: No se pudo crear el contenedor, revise los parametos intoducidos."
+    exit
+  fi
   DISTRO=$(cat /tmp/$container_name.txt | grep "You just created a" | awk '{print $5}')
   echo ""
   echo "¡¡¡El contenenedor se ha creado con exito!!!"
@@ -167,7 +173,10 @@ elif [[ $DISTRO = "Ubuntu" ]];then
 elif [[ $DISTRO =~ ^(Fedora|Centos|Rockylinux|Almalinux)$ ]];then
   configrar_contenedor_rhel
 else
-  echo "Este script no puede configurar la distro seleccionada"
+  pausa
+  limpiar
+  echo "Este script no puede configurar la distro seleccionada, pero el contenedor se ha creado."
+  echo ""
 fi
 configurar_hosts
 imprimir_info
