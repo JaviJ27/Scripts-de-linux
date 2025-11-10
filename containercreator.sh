@@ -151,7 +151,7 @@ configrar_contenedor_rhel(){
 
 configurar_hosts(){
   IP_LXC=$(sudo lxc-info $container_name | egrep -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
-  printf "192.168.1.10\t$container_name\n" >> /etc/hosts
+  printf "$IP_LXC\t$container_name\n" >> /etc/hosts
 }
 
 imprimir_info(){
