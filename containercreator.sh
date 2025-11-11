@@ -34,6 +34,12 @@ pausa(){
 crear_contenedor(){
   echo -n "Introduzca el nombre del contenedor: "
   read container_name
+  lxc-info $container_name
+  if [[ $? -eq 0 ]];then
+    echo ""
+    echo "ERROR: Ya existe un contendor con nombre $container_name."
+    exit
+  fi
   echo ""
   lxc-create -n $container_name -t download 2>/var/log/containercreator | tee /tmp/$container_name.txt
   cat /tmp/$container_name.txt | grep ERROR >/dev/null 2>/dev/null
