@@ -34,7 +34,7 @@ pausa(){
 crear_contenedor(){
   echo -n "Introduzca el nombre del contenedor: "
   read container_name
-  lxc-info $container_name
+  lxc-info $container_name >/dev/null 2>/dev/null
   if [[ $? -eq 0 ]];then
     echo ""
     echo "ERROR: Ya existe un contendor con nombre $container_name."
