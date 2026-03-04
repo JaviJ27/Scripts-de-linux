@@ -58,9 +58,8 @@ configurar_user_contenedor(){
   echo ""
   lxc-attach $container_name -- useradd -m -s /bin/bash usuario >/dev/null 2>/var/log/containercreator
   lxc-attach $container_name -- mkdir /home/usuario/.ssh >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- chown usuario:usuario /home/usuario/.ssh >/dev/null 2>/var/log/containercreator
   lxc-attach $container_name -- bash -c 'echo <TU CLAVE PUBLICA> > /home/usuario/.ssh/authorized_keys' >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- chown usuario:usuario /home/usuario/.ssh/authorized_keys >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- chown usuario:usuario -R /home/usuario/.ssh >/dev/null 2>/var/log/containercreator
   lxc-attach $container_name -- bash -c 'echo "usuario ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers' >/dev/null 2>/var/log/containercreator
 }
 
