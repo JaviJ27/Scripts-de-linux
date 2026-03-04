@@ -56,11 +56,11 @@ crear_contenedor(){
 configurar_user_contenedor(){
   echo "Creando nuevo usuario"
   echo ""
-  lxc-attach $container_name -- useradd -m -s /bin/bash usuario >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- mkdir /home/usuario/.ssh >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- bash -c 'echo <TU CLAVE PUBLICA> > /home/usuario/.ssh/authorized_keys' >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- chown usuario:usuario -R /home/usuario/.ssh >/dev/null 2>/var/log/containercreator
-  lxc-attach $container_name -- bash -c 'echo "usuario ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers' >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- useradd -m -s /bin/bash javier >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- mkdir /home/javier/.ssh >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- bash -c 'echo <TU CLAVE PUBLICA> > /home/javier/.ssh/authorized_keys' >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- chown javier:javier -R /home/javier/.ssh >/dev/null 2>/var/log/containercreator
+  lxc-attach $container_name -- bash -c 'echo "javier ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers' >/dev/null 2>/var/log/containercreator
 }
 
 configrar_contenedor_debian(){
@@ -163,7 +163,7 @@ imprimir_info(){
   echo "Esta es la información de su nuevo contenedor"
   lxc-info $container_name
   echo ""
-  echo "Puede conectarse a su contenedor con ssh usuario@$container_name"
+  echo "Puede conectarse a su contenedor con ssh javier@$container_name"
 }
 
 #----------------------------------------------------------------------------------------------------------------
