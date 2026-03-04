@@ -18,7 +18,7 @@ root() {
 conexion() {
   echo ""
   echo "Comprobando que tenga conexión a internet..."
-  ping 8.8.8.8 -c 3  
+  ping 8.8.8.8 -c 3
   if [[ $? -ne 0 ]];then
     echo "Usted no tiene conexión, intentelo de nuevo mas tarde"
     exit 2
